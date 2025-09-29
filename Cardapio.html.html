@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nandy's Delights - Seletor de Salgados</title>
+    <!-- Carrega o Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f3f0; /* Fundo suave */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        /* Cor principal inspirada no logo: um vermelho escuro e apetitoso */
+        .brand-red { background-color: #b42318; }
+        .brand-text-red { color: #b42318; }
+        .brand-border-red { border-color: #b42318; }
+        /* Animação de Pulsar para a Oferta */
+        @keyframes pulse-promo {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .animate-pulse-promo {
+            animation: pulse-promo 2s infinite ease-in-out;
+        }
+        /* Estilos para a lista de itens */
+        .item-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+        }
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="w-full max-w-xl bg-white shadow-2xl rounded-2xl p-6 md:p-10 border-4 brand-border-red">
+
+        <!-- O conteúdo será injetado aqui pelo JavaScript -->
+
+    </div>
+
+    <script>
+        // Dados do menu COMPLETO
+        const menuData = {
+            chicken: {
+                title_pt: "Clássicos de Frango",
+                title_de: "Klassiker mit Huhn",
+                icon: "🐔",
+                items: [
+                    { pt: "Coxinha de frango tradicional", de: "Klassische Hühner-Teigtäschechen" },
+                    { pt: "Coxinha de frango com catupiry", de: "Hühner-Teigtäschchen com Catupiry-Frischkäse" }
+                ]
+            },
+            meat: {
+                title_pt: "Recheios de Carne",
+                title_de: "Fleischfüllungen",
+                icon: "🥩",
+                items: [
+                    { pt: "Travesseirinho de carne moída", de: "Teigtäschchen com Hackfleischfüllung" },
+                    { pt: "Travesseirinho de cheddar com bacon", de: "Teigtäschchen com Cheddar und Speck" },
+                    { pt: "Quibe de carne tradicional", de: "Klassischer Rinder-Kibbeh" },
+                    { pt: "Quibe de carne com cheddar", de: "Rinder-Kibbeh com Cheddar" }
+                ]
+            },
+            cheese: {
+                title_pt: "Queijos e Cremosos",
+                title_de: "Käse und Cremiges",
+                icon: "🧀",
+                items: [
+                    { pt: "Bolinha de queijo mussarela com ervas", de: "Mozzarella-Käsebällchen com Kräutern" },
+                    { pt: "Bolinha de presunto e queijo", de: "Schinken-Käsebällchen" },
+                    { pt: "Travesseirinho de cheddar com bacon", de: "Teigtäschchen com Cheddar und Speck" },
+                    { pt: "Bolinha de 4 queijos", de: "Vierkäse-Bällchen" }
+                ]
+            },
+            veggie: {
+                title_pt: "Opções Vegetarianas",
+                title_de: "Vegetarische Optionen",
+                icon: "🌱",
+                items: [
+                    { pt: "Coxinha de brócolis com queijo", de: "Brokkoli-Coxinha com Käse" },
+                    { pt: "Coxinha de queijo com alho", de: "Käse-Coxinha com Knoblauch" },
+                    { pt: "Travesseirinho de palmito cremoso", de: "Teigtäschchen com cremiger Palmenherz-Füllung" },
+                    { pt: "Mini pastel de queijo com tomate seco", de: "Mini-Pastel com Käse und getrockneten Tomaten" },
+                    { pt: "Croquete de milho", de: "Mais-Kroketten" }
+                ]
+            },
+            other: {
+                title_pt: "Outros Sabores Diferentes",
+                title_de: "Andere besondere Geschmacksrichtungen",
+                icon: "🌶️",
+                items: [
+                    { pt: "Bolinha de calabresa com queijo", de: "Calabresa-Käsebällchen" },
+                    { pt: "Pão de queijo", de: "Käsebrötchen (Pão de Queijo)" },
+                    { pt: "Pão de queijo com goiabada", de: "Käsebrötchen com Guavenpaste" }
+                ]
+            }
+        };
+
+        const PROMO_TEXT_PT = "O CENTO por R$ 99,90! (Ganhe 2 refri 1,5L + Frete Grátis 5km)";
+        const PROMO_TEXT_DE = "100 Stück für 99,90 R$! (2 x 1,5L Softdrinks gratis + Kostenloser Versand 5km)";
+
+        const appDiv = document.getElementById('app');
+
+        // Função para simular o "delay" de carregamento
+        function showLoading(show) {
+            let loadingDiv = document.getElementById('loading-overlay');
+            if (!loadingDiv) {
+                loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loading-overlay';
+                // Garante que o spinner de loading fique por cima do conteúdo
+                loadingDiv.className = 'absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center transition-opacity duration-300 rounded-xl z-10';
+                loadingDiv.innerHTML = '<div class="flex flex-col items-center"><div class="animate-spin rounded-full h-12 w-12 border-4 border-t-4 brand-border-red border-t-white"></div><p class="mt-4 brand-text-red font-bold">Preparando sua delícia...</p></div>';
+                appDiv.style.position = 'relative';
+                appDiv.appendChild(loadingDiv);
+            }
+            loadingDiv.style.opacity = show ? '1' : '0';
+            loadingDiv.style.pointerEvents = show ? 'auto' : 'none';
+        }
+
+        // Função que renderiza a tela inicial
+        function renderHome() {
+            // Cria um array com as chaves das categorias
+            const categoryKeys = Object.keys(menuData);
+            
+            // Renderiza as categorias. Usamos col-span-2 apenas se houver um número ímpar de botões
+            // para que o último botão, 'other', ocupe a linha inteira.
+            const categoriesHtml = categoryKeys.map((key, index) => {
+                const isLastAndOdd = (index === categoryKeys.length - 1) && (categoryKeys.length % 2 !== 0);
+                const isLast = (index === categoryKeys.length - 1);
+                
+                let buttonClasses = "w-full p-4 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition duration-300 text-left flex items-center justify-between";
+                
+                // Trata o botão 'other' com cor e span diferentes
+                if (isLast) {
+                    buttonClasses = `col-span-2 w-full p-4 bg-yellow-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.01] transition duration-300 text-left flex items-center justify-between mt-4`;
+                } else {
+                    buttonClasses = `w-full p-4 brand-red text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition duration-300 text-left flex items-center justify-between`;
+                }
+
+
+                // Se o botão 'other' for tratado em separado, ele não deve ser renderizado aqui, 
+                // mas como ele é o último no nosso objeto, vamos mantê-lo no loop e usar a classe col-span-2.
+                // Vou reverter para o código original, mas vou garantir que o último botão tenha col-span-2
+                // e remover o bloco de código selecionado pelo usuário que era a duplicação.
+                
+                // Nova lógica para garantir 2 colunas, exceto o último, que usa col-span-2 e tem cor diferente.
+                const buttonColorClass = (key === 'other') ? 'bg-yellow-600' : 'brand-red';
+                const buttonSpanClass = (key === 'other') ? 'col-span-2 mt-4' : '';
+
+                return `
+                    <button data-category="${key}"
+                        class="category-btn ${buttonSpanClass} p-4 ${buttonColorClass} text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition duration-300 text-left flex items-center justify-between">
+                        <div>
+                            <span class="text-lg">${menuData[key].title_pt}</span><br>
+                            <span class="text-sm opacity-80">${menuData[key].title_de}</span>
+                        </div>
+                        <span class="text-2xl">${menuData[key].icon}</span>
+                    </button>
+                `;
+            }).join('');
+
+
+            appDiv.innerHTML = `
+                <!-- Header (Logotipo) -->
+                <div class="flex flex-col items-center mb-6">
+                    <!-- Logo placeholder com ícone de chef -->
+                    <div class="w-24 h-24 mb-4 rounded-full brand-red flex items-center justify-center border-4 brand-border-red p-1 shadow-inner">
+                        <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3v-1a3 3 0 013-3h7a3 3 0 003-3V9a3 3 0 00-3-3h-7a3 3 0 01-3-3V4"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-3xl font-extrabold brand-text-red">NANDY'S DELIGHTS</h1>
+                    <p class="text-gray-500 text-sm italic">"FOOD MADE WITH LOVE, SERVED WITH CARE"</p>
+                </div>
+
+                <!-- Banner da Promoção -->
+                <div class="brand-red text-white p-3 rounded-xl mb-6 text-center shadow-xl animate-pulse-promo border-2 border-yellow-300">
+                    <p class="font-bold text-xl">${PROMO_TEXT_PT}</p>
+                    <p class="text-sm opacity-90">${PROMO_TEXT_DE}</p>
+                </div>
+
+
+                <!-- Pergunta Interativa -->
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-center mb-6">
+                    Selecione a Categoria para ver o Cardápio Completo:<br>
+                    <span class="text-lg text-gray-600 font-normal">Wählen Sie die Kategorie, um die vollständige Speisekarte zu sehen:</span>
+                </h2>
+
+                <!-- Opções (Botões de Categoria) -->
+                <div class="grid grid-cols-2 gap-4">
+                    ${categoriesHtml}
+                </div>
+            `;
+
+            // Adiciona Event Listeners aos botões
+            document.querySelectorAll('.category-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const category = e.currentTarget.dataset.category;
+                    showLoading(true);
+                    setTimeout(() => {
+                        renderResult(category);
+                        showLoading(false);
+                    }, 1200); // Simula o tempo de processamento/vídeo
+                });
+            });
+        }
+
+        // Função que renderiza o resultado, mostrando todos os itens da categoria
+        function renderResult(categoryKey) {
+            const category = menuData[categoryKey];
+            
+            // Mapeia os itens para a lista HTML
+            const itemListHtml = category.items.map(item => `
+                <li class="flex flex-col">
+                    <span class="font-bold text-lg">${item.pt}</span>
+                    <span class="text-sm opacity-80">${item.de}</span>
+                </li>
+            `).join('');
+
+
+            appDiv.innerHTML = `
+                <div class="flex flex-col items-center text-center">
+                    <div class="text-6xl mb-6">${category.icon}</div>
+
+                    <!-- Título da Categoria -->
+                    <h2 class="text-3xl md:text-4xl font-extrabold brand-text-red mb-1">
+                        ${category.title_pt}
+                    </h2>
+                    <p class="text-lg text-gray-700 font-semibold mb-6">
+                        ${category.title_de}
+                    </p>
+
+                    <!-- Lista Completa de Itens -->
+                    <div class="brand-red text-white rounded-xl w-full shadow-2xl p-6 mb-8 text-left">
+                        <ul class="item-list divide-y divide-white divide-opacity-30">
+                            ${itemListHtml}
+                        </ul>
+                    </div>
+
+                    <!-- Call to Action -->
+                    <div class="mt-4 w-full">
+                        <p class="text-gray-600 mb-4 text-md font-semibold">
+                            Pronto para o seu Cento Misto? Aproveite a super promoção:
+                        </p>
+                        <p class="text-xl font-extrabold brand-text-red mb-4">${PROMO_TEXT_PT}</p>
+
+                        <a href="#" onclick="alert('Simulação de Encomenda: Incluir link de contato do WhatsApp ou página de pedidos aqui!')"
+                           class="inline-block w-full bg-green-600 text-white p-3 font-bold rounded-xl shadow-md hover:bg-green-700 transition duration-300 transform hover:scale-[1.01] uppercase tracking-wider">
+                           Quero Encomendar Agora!
+                        </a>
+
+                        <button id="restart-btn"
+                            class="w-full mt-3 bg-gray-700 text-white p-3 font-bold rounded-xl shadow-md hover:bg-gray-800 transition duration-300 transform hover:scale-[1.01]">
+                            Escolher Outra Categoria / Eine andere Kategorie wählen
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Adicionado um alerta (em substituição ao 'alert()') no link de encomenda.
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                showLoading(true);
+                setTimeout(() => {
+                    renderHome();
+                    showLoading(false);
+                }, 800);
+            });
+        }
+
+        // Inicializa a aplicação
+        window.onload = function() {
+            renderHome();
+        };
+
+    </script>
+
+</body>
+</html>
